@@ -34,15 +34,16 @@ text_columns = "body"
 #bytag = dataframe.groupby(column_to_predict).aggregate(np.count_nonzero)
 #tags = bytag[bytag.body >= min_data_per_class].index
 #dataframe = dataframe[dataframe[column_to_predict].isin(tags)]
-for i in range(0,4):
-    y = dataframe[column_to_predict[i]]
-    X = dataframe[text_columns]
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.20)
-    #Removing stop words and performing stemming using PIPELINE
+#Removing stop words and performing stemming using PIPELINE
     count_vect = CountVectorizer(stop_words=stop_words_lang)
     #count_vect = StemmedCountVectorizer(stop_words=stop_words_lang)
     #Using Naive Bayes Classifier
     text_clf = Pipeline([('vect', count_vect),('tfidf', TfidfTransformer()),('clf', MultinomialNB(fit_prior=fit_prior))])
+
+for i in range(0,4):
+    y = dataframe[column_to_predict[i]]
+    X = dataframe[text_columns]
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.20)
     #Using SVM Classifier
     #text_clf = Pipeline([('vect', count_vect),('tfidf', TfidfTransformer()),('clf', SGDClassifier(loss='hinge', penalty='l2', alpha=1e-3,n_iter=5, random_state=42))])
     text_clf = text_clf.fit(X_train, y_train)
@@ -53,14 +54,24 @@ for i in range(0,4):
     
 prediction_acc.columns = column_to_predict
 
+
+
 ticket = "Hi, my outlook app seems to misbehave a lot lately. I cannot sync my emails and it often crashes and asks for credentials.Could you help me out"
 #ticket = input("Enter ticket")
 ticket_test = pd.Series(ticket)
-ticket_analysis = text_clf.predict(ticket_test)
 
 
-
-cm = confusion_matrix(y_test, y_pred)
-
-prediction_acc = np.mean(y_pred == y_test) 
+for i in range(0,4):
+    y = dataframe[column_to_predict[i]]
+    X = dataframe[text_columns]
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.20)
+    #Using SVM Classifier
+    #text_clf = Pipeline([('vect', count_vect),('tfidf', TfidfTransformer()),('clf', SGDClassifier(loss='hinge', penalty='l2', alpha=1e-3,n_iter=5, random_state=42))])
+    text_clf = text_clf.fit(X_train, y_train)
+    ticket_analysis = text_clf.predict(ticket_test)
+    print(column_to_predict[i],"=",ticket_analysis)
+    
+    
+    
+#cm = confusion_matrix(y_test, y_pred)
 
